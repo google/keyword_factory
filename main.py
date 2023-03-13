@@ -1,8 +1,23 @@
+# Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from utils.config import Config
 from utils.ads_searcher import RecBuilder, KeywordRemover
 from utils.sheets import SheetsInteractor, create_new_spreadsheet
+from utils.classifier import Classifier
 from concurrent import futures
-from typing import List
+from typing import List, Dict
 from google.ads.googleads.client import GoogleAdsClient
 from pathlib import Path
 import logging
@@ -47,14 +62,14 @@ def remove_keywords(client: GoogleAdsClient, recommendations: List[str], accoutn
             logging.exception(e)
 
 
-# def _filter_run(client: GoogleAdsClient, accounts: List[str], uploaded_kws: List[str]):
-#     remove_keywords(client, uploaded_kws, accounts)
+def classify_keywords(kws) -> Dict[str, Dict[str, str]]:
+    """ Classifys the list of keywords, using GCP NLP classification service.
+    Args: List[str]
+        list of keywords to categorize
+    Returns: 
+        a dict with the keyword as key - full categorization and confidence score """
+    return Classifier().classify_list(kws) 
 
-
-# def _full_run(client: GoogleAdsClient, accounts: List[str]):
-#     recommendations = get_recommendations(client, accounts)
-#     remove_keywords(client, recommendations, accounts)
- 
 
 def run(config: Config, accounts: List[str], run_type: str, uploaded_kws=[]):
     client = config.get_ads_client()
@@ -66,11 +81,19 @@ def run(config: Config, accounts: List[str], run_type: str, uploaded_kws=[]):
     sheets_interactor = SheetsInteractor(sheets_service, config.spreadsheet_url)
 
     if run_type == "Full Run":
-        # _full_run(client, accounts)
         kws = get_recommendations(client, accounts)
     elif run_type == "Filter":
-        # _filter_run(client, accounts, uploaded_kws)
         kws = uploaded_kws
-    
-    sheets_interactor.write_to_spreadsheet_single_column(kws)
+    # Remove empty string if exists
+    kws.remove('')
+
+    # Dedup existing keywords
+    remove_keywords(client, kws, accounts)
+
+    # Categorize
+    results = classify_keywords(kws)
+
+
+    print(results)
+    # sheets_interactor.write_to_spreadsheet_single_column(kws)
 

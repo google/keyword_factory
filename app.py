@@ -28,6 +28,12 @@ RUN_TYPE_TOOLTIP = """Choose 'Full Run' to pull new keywords and categorize them
 
 FILE_UPLOAD_HELP = """Upload a CSV file with keywords you want to filter and categorize. Use a single column with one KW each line"""
 
+
+def run_tool():
+    run(st.session_state.config, st.session_state.accounts_selected, st.session_state.run_type, st.session_state.uploaded_kws)    
+    results_url = config.spreadsheet_url
+    st.success(f'Keyword Factory run completed successfully. [Open in Google Sheets]({results_url})', icon="✅")
+
 def validate_config(config):
     if config.valid_config:
         st.session_state.valid_config = True
@@ -66,7 +72,7 @@ def authenticate(config_params):
 
 
 def get_accounts_list():
-    st.session_state.accounts_for_ui = get_all_child_accounts(st.session_state.config)
+    st.session_state.accounts_for_ui = get_all_child_accounts(st.session_state.config, True)
 
 def get_label_list():
     st.session_state.account_labels = get_account_labels(st.session_state.config)
@@ -174,7 +180,7 @@ if st.session_state.run_btn_clicked:
         st.session_state.accounts_selected = get_accounts_by_labels(st.session_state.config, st.session_state.labels_selected)
     # Get all child accounts
     if st.session_state.all_accounts == 'All Accounts':
-        st.session_state.accounts_selected = get_all_child_accounts(st.session_state.config)
+        st.session_state.accounts_selected = get_all_child_accounts(st.session_state.config, False)
 
     with st.spinner(text='Factory running... This may take a few minutes'):
-        run(st.session_state.config, st.session_state.accounts_selected, st.session_state.run_type, st.session_state.uploaded_kws)
+        run_tool()

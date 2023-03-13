@@ -1,10 +1,9 @@
-protobuf==3.20.0
-google-ads==18.0.0
+protobuf
+google-ads
 google-api-python-client 
-google-auth-httplib2 
-google-auth-oauthlib
 python-dateutil
 pyyaml
 streamlit
 google-cloud
 google-cloud-storage
+google-cloud-language>=2.6.0
