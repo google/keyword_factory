@@ -18,12 +18,11 @@ from typing import List, Any, Dict
 from datetime import datetime
 from googleapiclient.errors import HttpError
 
-_HEADER = ['keyword', 'account name', 'account id', 'campaign name',
-           'campaign id', 'adgroup name', 'adgroup id','prominent adgroup', 'clicks', 'impressions', 'conversions', 'cost', 'ctr']
+_HEADER = ['Keyword', 'Full Category Path', 'Top Level', 'Bottom Level', 'Confidence']
 _RUN_DATETIME = datetime.now()
 _RUN_METADATA = f'Last run was completed on {_RUN_DATETIME}'
 _OUTPUT_SHEET = 'Output'
-_SS_NAME = 'SeaTerA'
+_SS_NAME = 'Keyword Factory'
 
 class SheetsInteractor:
     def __init__(self, service, spreadsheet_url):
@@ -46,34 +45,18 @@ class SheetsInteractor:
         spreadsheet_id = spreadsheet_match.group(1)
         return spreadsheet_id
 
-    def write_to_spreadsheet(self, ouput: Dict[str, Dict[Any, Any]]):
-        data = []
-        for sheet, values in ouput.items():
-            self._clear_sheet(sheet)
-            range = sheet + '!A1:' + \
-                chr(len(values[0]) + 65) + str(len(values))
-            data.append({'range': range, 'values': values})
 
-        body = {'data': data, 'valueInputOption': "USER_ENTERED"}
-        try:
-            result = self.service.values().batchUpdate(
-                spreadsheetId=self.spreadsheet_id, body=body).execute()
-            logging.info(
-                f"{(result.get('totalUpdatedRows') -4)} Rows updated.")
-            return result
-        except HttpError as e:
-            logging.exception(e)
-            return e
-        
-    def write_to_spreadsheet_single_column(self, output: List[str]):
-        # Temp sheets writer
-        formatted_output_list_of_lists = [[i] for i in output]
-        self._clear_sheet(_OUTPUT_SHEET)
-        range = _OUTPUT_SHEET + '!A1:A' + str(len(output))
-        body = {'values': formatted_output_list_of_lists}
-        result = self.service.values().update(
-            spreadsheetId=self.spreadsheet_id, range=range,
-            valueInputOption='USER_ENTERED', body=body).execute()
+    def write_to_sheet(self, values, sheet=_OUTPUT_SHEET):
+        range = sheet + '!A1:' + chr(len(values[0]) + 65) + str(len(values))
+        body = {
+            'values': values
+        }
+        self.service.values().update(
+            spreadsheetId=self.spreadsheet_id,
+            range=range,
+            valueInputOption='RAW',
+            body=body             
+        ).execute()
 
     def read_from_spreadsheet(self, range) -> List[List[Any]]:
         results = self.service.values().get(
@@ -108,3 +91,18 @@ def create_new_spreadsheet(sheet_service):
                                             fields='spreadsheetUrl').execute()
     return ss.get('spreadsheetUrl')
 
+
+def format_data_for_sheet(data: Dict[str, Dict[str, Any]]) -> List[List[Any]]:
+    """ Gets a dict with recommendations and categorizations and formats 
+    it to be writable to spreadsheet"""
+    
+    values = [_HEADER]
+    for kw, cat_info in data.items():
+        full_cat = cat_info.get('full category', '')
+        conf = cat_info.get('confidence', '')
+        top_cat = full_cat.split('/')[1]
+        bottom_cat = full_cat.split('/')[-1]
+
+        values.append([kw, full_cat, top_cat, bottom_cat, conf])        
+
+    return values

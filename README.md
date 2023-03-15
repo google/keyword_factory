@@ -26,14 +26,6 @@
 
 ## Usage
 
-1. If it's your first time using this tool - fill in your credentials in the "Authentication" tab.
-
-1. Choose if you want to run the analysis on all accounts under your MCC, or on selected accounts.
-
-1. Choose your date range and search term thresholds, and click "RUN"
-
-1. A link to a results spreadsheet will be presented once the run is complete
-
 
 ## Disclaimer
 This is not an officially supported Google product.

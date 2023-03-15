@@ -14,15 +14,17 @@
 
 from utils.config import Config
 from utils.ads_searcher import RecBuilder, KeywordRemover
-from utils.sheets import SheetsInteractor, create_new_spreadsheet
-from utils.classifier import Classifier
+from utils.sheets import SheetsInteractor, create_new_spreadsheet, format_data_for_sheet
+# from utils.classifier import Classifier
 from concurrent import futures
 from typing import List, Dict
 from google.ads.googleads.client import GoogleAdsClient
 from pathlib import Path
 import logging
+import requests
 
 _LOGS_PATH = Path('./server.log')
+_CLASSIFIER_URL = ''
 
 logging.basicConfig(filename=_LOGS_PATH,
                     level=logging.INFO,
@@ -68,7 +70,8 @@ def classify_keywords(kws) -> Dict[str, Dict[str, str]]:
         list of keywords to categorize
     Returns: 
         a dict with the keyword as key - full categorization and confidence score """
-    return Classifier().classify_list(kws) 
+    response = requests.post(_CLASSIFIER_URL, json={"kws": kws})
+    return response.json()
 
 
 def run(config: Config, accounts: List[str], run_type: str, uploaded_kws=[]):
@@ -84,16 +87,23 @@ def run(config: Config, accounts: List[str], run_type: str, uploaded_kws=[]):
         kws = get_recommendations(client, accounts)
     elif run_type == "Filter":
         kws = uploaded_kws
+    
     # Remove empty string if exists
-    kws.remove('')
+    try:
+        kws.remove('')
+    except ValueError:
+        pass
 
-    # Dedup existing keywords
-    remove_keywords(client, kws, accounts)
+    
+    try:
+        # Dedup existing keywords
+        remove_keywords(client, kws, accounts)
+        # Categorize
+        classified_kws = classify_keywords(kws)
+        print(classify_keywords)
+        # Write to spreadsheet
+        sheets_interactor.write_to_sheet(values=format_data_for_sheet(classified_kws))
+    except Exception as e:
+        logging.exception(e)
 
-    # Categorize
-    results = classify_keywords(kws)
-
-
-    print(results)
-    # sheets_interactor.write_to_spreadsheet_single_column(kws)
 
