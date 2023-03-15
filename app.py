@@ -14,7 +14,7 @@
 
 from utils.config import Config
 from utils.utils import get_all_child_accounts, get_account_labels, get_accounts_by_labels
-from main import run
+from server import run
 from io import StringIO
 import streamlit as st
 import yaml

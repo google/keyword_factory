@@ -15,16 +15,16 @@
 from utils.config import Config
 from utils.ads_searcher import RecBuilder, KeywordRemover
 from utils.sheets import SheetsInteractor, create_new_spreadsheet, format_data_for_sheet
-# from utils.classifier import Classifier
 from concurrent import futures
 from typing import List, Dict
 from google.ads.googleads.client import GoogleAdsClient
 from pathlib import Path
 import logging
 import requests
+import os
 
 _LOGS_PATH = Path('./server.log')
-_CLASSIFIER_URL = ''
+_CLASSIFIER_URL = os.getenv('cf_uri')
 
 logging.basicConfig(filename=_LOGS_PATH,
                     level=logging.INFO,

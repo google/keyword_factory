@@ -1,0 +1,17 @@
+{
+    "name": "keyword_factory",
+    "options": {
+      "allow-unauthenticated": true,
+      "memory": "1024Mi",
+      "cpu": "2"
+    },
+    "hooks": {
+        "prebuild": {
+          "commands": ["chmod 777 ./setup/prebuild.sh", "./setup/prebuild.sh"]
+        },
+        "postcreate": {
+            "commands": ["chmod 777 ./setup/postcreate.sh", "./setup/postcreate.sh"]
+        }
+    }
+  }
+  

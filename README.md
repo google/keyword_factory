@@ -1,4 +1,7 @@
 # Keyword Factory
+Use different techniques to generate business relevant keywords, categorise them, and upload to the relevant campaigns at scale
+
+This tool is a web app that can be easily deployed on GCP. It helps Google Ads users generate new keywords for their campaigns.
 
 ## Prerequisites
 

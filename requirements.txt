@@ -6,4 +6,3 @@ pyyaml
 streamlit==1.20
 google-cloud
 google-cloud-storage
-# google-cloud-language>=2.6.0

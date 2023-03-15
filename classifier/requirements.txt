@@ -1,0 +1,3 @@
+functions-framework==3.*
+google-cloud
+google-cloud-language==2.9.0
