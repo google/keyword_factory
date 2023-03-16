@@ -40,6 +40,11 @@ class Classifier():
                         }
                     }
                 )
+                if not response.categories:
+                    results[kw] = {
+                        "full category": '',
+                        "confidence": None
+                    } 
                 for category in response.categories:
                     results[kw] = {
                         "full category": category.name,

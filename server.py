@@ -19,9 +19,13 @@ from concurrent import futures
 from typing import List, Dict
 from google.ads.googleads.client import GoogleAdsClient
 from pathlib import Path
+import urllib
+import google.auth.transport.requests
+import google.oauth2.id_token
 import logging
 import requests
 import os
+import json
 
 _LOGS_PATH = Path('./server.log')
 _CLASSIFIER_URL = os.getenv('cf_uri')
@@ -70,8 +74,17 @@ def classify_keywords(kws) -> Dict[str, Dict[str, str]]:
         list of keywords to categorize
     Returns: 
         a dict with the keyword as key - full categorization and confidence score """
-    response = requests.post(_CLASSIFIER_URL, json={"kws": kws})
-    return response.json()
+    req = urllib.request.Request(_CLASSIFIER_URL, method="POST")
+    auth_req = google.auth.transport.requests.Request()
+    id_token = google.oauth2.id_token.fetch_id_token(auth_req, _CLASSIFIER_URL)
+    req.add_header("Authorization", f"Bearer {id_token}")
+    req.add_header('Content-Type', 'application/json')
+
+    data = json.dumps({"kws":kws})
+    data = data.encode()
+    response = urllib.request.urlopen(req,data=data)
+    content = response.read().decode('utf-8')
+    return json.loads(content)
 
 
 def run(config: Config, accounts: List[str], run_type: str, uploaded_kws=[]):
@@ -100,7 +113,6 @@ def run(config: Config, accounts: List[str], run_type: str, uploaded_kws=[]):
         remove_keywords(client, kws, accounts)
         # Categorize
         classified_kws = classify_keywords(kws)
-        print(classify_keywords)
         # Write to spreadsheet
         sheets_interactor.write_to_sheet(values=format_data_for_sheet(classified_kws))
     except Exception as e:

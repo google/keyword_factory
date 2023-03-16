@@ -100,9 +100,13 @@ def format_data_for_sheet(data: Dict[str, Dict[str, Any]]) -> List[List[Any]]:
     for kw, cat_info in data.items():
         full_cat = cat_info.get('full category', '')
         conf = cat_info.get('confidence', '')
-        top_cat = full_cat.split('/')[1]
-        bottom_cat = full_cat.split('/')[-1]
-
+        if full_cat:
+            top_cat = full_cat.split('/')[1]
+            bottom_cat = full_cat.split('/')[-1]
+        else:
+            top_cat = ''
+            bottom_cat = ''
+            
         values.append([kw, full_cat, top_cat, bottom_cat, conf])        
 
     return values

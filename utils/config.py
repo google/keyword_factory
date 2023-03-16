@@ -35,7 +35,7 @@ SHEETS_SERVICE_SCOPES = ['https://www.googleapis.com/auth/spreadsheets',
 class Config:
     def __init__(self) -> None:
         self.file_path = CONFIG_FILE_PATH
-        self.storage_client = storage.Client.from_service_account_json('./key.json')
+        self.storage_client = storage.Client()
         self.bucket = self.storage_client.bucket(BUCKET_NAME)
         config = self.load_config_from_file()
         if config is None:

@@ -16,7 +16,7 @@ echo "Setting Project ID: ${GOOGLE_CLOUD_PROJECT}"
 gcloud config set project ${GOOGLE_CLOUD_PROJECT}
 
 echo "Creating Classifier cloud function..."
-gcloud functions deploy classifier_keyword_factory \
+gcloud functions deploy classifier-keyword-factory \
 --gen2 \
 --region=${GOOGLE_CLOUD_REGION} \
 --runtime=python39 \

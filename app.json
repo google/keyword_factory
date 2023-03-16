@@ -1,5 +1,5 @@
 {
-    "name": "keyword_factory",
+    "name": "keyword-factory",
     "options": {
       "allow-unauthenticated": true,
       "memory": "1024Mi",
