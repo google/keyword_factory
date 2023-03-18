@@ -118,7 +118,7 @@ class MccBuilder(Builder):
         for batch in accounts_rows:
             for row in batch.results:
                 row = row._pb
-                accounts.append(row.customer_client.id)
+                accounts.append(str(row.customer_client.id))
         
         return accounts
     
