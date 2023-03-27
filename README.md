@@ -29,6 +29,19 @@ This tool is a web app that can be easily deployed on GCP. It helps Google Ads u
 
 ## Usage
 
+1. On first use - set you credentials under the "Authentication" tab and click "Save"
+
+1. Under "Run Settings" tab, configure desired parameters
+
+1. Choose if you want to run on all the accounts, selected specifics accouns, or all accounts under certain labels
+
+1. Choose run type:
+
+    1. Choose "Full Run" if you want to get all non-existing keyword recommendations from selected accounts and categorize them
+
+    1. Choose "Filter Run" if you want to supply a CSV of keywords and have them categorized. (Use a csv file with one column and one keyword in each line)
+
+1. Wait a few minutes for the run to complete. Once done, you will be provided with a link to the results spreadsheet.
 
 ## Disclaimer
 This is not an officially supported Google product.
