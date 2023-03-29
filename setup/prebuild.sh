@@ -15,6 +15,18 @@
 echo "Setting Project ID: ${GOOGLE_CLOUD_PROJECT}"
 gcloud config set project ${GOOGLE_CLOUD_PROJECT}
 
+echo "Enabling Cloud Storage service..."
+gcloud services enable storage-component.googleapis.com 
+
+echo "Enabling APIs..."
+gcloud services enable googleads.googleapis.com language.googleapis.com sheets.googleapis.com artifactregistry.googleapis.com cloudbuild.googleapis.com
+
+echo "Creating cloud storage bucket..."
+gcloud alpha storage buckets create gs://${GOOGLE_CLOUD_PROJECT}-keyword_factory --project=${GOOGLE_CLOUD_PROJECT}
+
+echo "Uploading config.yaml to cloud storage..."
+gcloud alpha storage cp ./config.yaml gs://${GOOGLE_CLOUD_PROJECT}-keyword_factory
+
 echo "Creating Classifier cloud function..."
 gcloud functions deploy classifier-keyword-factory \
 --gen2 \
@@ -24,15 +36,3 @@ gcloud functions deploy classifier-keyword-factory \
 --entry-point=classify \
 --trigger-http \
 --timeout=900s
-
-echo "Enabling Cloud Storage service..."
-gcloud services enable storage-component.googleapis.com 
-
-echo "Enabling APIs..."
-gcloud services enable googleads.googleapis.com language.googleapis.com sheets.googleapis.com
-
-echo "Creating cloud storage bucket..."
-gcloud alpha storage buckets create gs://${GOOGLE_CLOUD_PROJECT}-keyword_factory --project=${GOOGLE_CLOUD_PROJECT}
-
-echo "Uploading config.yaml to cloud storage..."
-gcloud alpha storage cp ./config.yaml gs://${GOOGLE_CLOUD_PROJECT}-keyword_factory
