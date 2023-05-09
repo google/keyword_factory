@@ -1,3 +1,6 @@
 functions-framework==3.*
 google-cloud
+google-cloud-storage
 google-cloud-language==2.9.0
+google-api-python-client 
+pyaml

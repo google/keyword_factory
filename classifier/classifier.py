@@ -13,7 +13,9 @@
 # limitations under the License.
 
 from google.cloud import language_v1
-import logging 
+from google.api_core.exceptions import ResourceExhausted
+from time import sleep
+import logging
 
 class Classifier():
     def __init__(self):
@@ -26,6 +28,8 @@ class Classifier():
     def classify_list(self, kw_list, language='en'):
         results = {}
         for kw in kw_list:
+            if not kw:
+                continue
             document = {
                 "content": kw,
                 "type_": self.type_,
@@ -51,6 +55,9 @@ class Classifier():
                         "confidence": category.confidence
                     }
                     break
+            
+            except ResourceExhausted as re:
+                sleep(5)
 
             except Exception as e:
                 logging.exception(e)
