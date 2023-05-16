@@ -68,23 +68,21 @@ def remove_keywords(client: GoogleAdsClient, recommendations: List[str], accoutn
             logging.exception(e)
 
 
-def classify_keywords(kws) -> Dict[str, Dict[str, str]]:
+def classify_keywords(row_num) -> Dict[str, Dict[str, str]]:
     """ Classifys the list of keywords, using GCP NLP classification service.
     Args: List[str]
-        list of keywords to categorize
+        List[str] of keywords to categorize
     Returns: 
-        a dict with the keyword as key - full categorization and confidence score """
+        Dict[str, Dict[str,str]] keyword as key - full categorization and confidence score """
     req = urllib.request.Request(_CLASSIFIER_URL, method="POST")
     auth_req = google.auth.transport.requests.Request()
     id_token = google.oauth2.id_token.fetch_id_token(auth_req, _CLASSIFIER_URL)
     req.add_header("Authorization", f"Bearer {id_token}")
     req.add_header('Content-Type', 'application/json')
 
-    data = json.dumps({"kws":kws})
+    data = json.dumps({"row_num":str(row_num)})
     data = data.encode()
     response = urllib.request.urlopen(req,data=data)
-    content = response.read().decode('utf-8')
-    return json.loads(content)
 
 
 def run(config: Config, accounts: List[str], run_type: str, uploaded_kws=[]):
@@ -106,16 +104,13 @@ def run(config: Config, accounts: List[str], run_type: str, uploaded_kws=[]):
         kws.remove('')
     except ValueError:
         pass
-
     
     try:
         # Dedup existing keywords
         remove_keywords(client, kws, accounts)
-        # Categorize
-        classified_kws = classify_keywords(kws)
         # Write to spreadsheet
-        sheets_interactor.write_to_sheet(values=format_data_for_sheet(classified_kws))
+        sheets_interactor.write_to_sheet(values=[[kw] for kw in kws])
+        return len(kws)
     except Exception as e:
         logging.exception(e)
-
 

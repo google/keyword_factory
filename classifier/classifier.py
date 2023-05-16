@@ -15,7 +15,9 @@
 from google.cloud import language_v1
 from google.api_core.exceptions import ResourceExhausted
 from time import sleep
-import logging
+import logging 
+
+_MAX_KW_CAT = 30000
 
 class Classifier():
     def __init__(self):
@@ -27,9 +29,9 @@ class Classifier():
         
     def classify_list(self, kw_list, language='en'):
         results = {}
-        for kw in kw_list:
-            if not kw:
-                continue
+        counter = 0
+        while counter < min(_MAX_KW_CAT, len(kw_list)):
+            kw = kw_list[counter]
             document = {
                 "content": kw,
                 "type_": self.type_,
@@ -50,20 +52,22 @@ class Classifier():
                         "confidence": None
                     } 
                 for category in response.categories:
-                    results[kw] = {
+                    results[kw + str(counter)] = {
                         "full category": category.name,
                         "confidence": category.confidence
                     }
                     break
-            
+                counter += 1
+
             except ResourceExhausted as re:
-                sleep(5)
+                sleep(2)
 
             except Exception as e:
                 logging.exception(e)
-                results[kw] = {
+                results[kw + str(counter)] = {
                     "full category": '',
                     "confidence": None
                 }
-        
+                counter += 1
+
         return results

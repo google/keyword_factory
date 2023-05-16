@@ -19,7 +19,7 @@ echo "Enabling Cloud Storage service..."
 gcloud services enable storage-component.googleapis.com 
 
 echo "Enabling APIs..."
-gcloud services enable googleads.googleapis.com language.googleapis.com sheets.googleapis.com artifactregistry.googleapis.com cloudbuild.googleapis.com
+gcloud services enable googleads.googleapis.com language.googleapis.com sheets.googleapis.com artifactregistry.googleapis.com cloudbuild.googleapis.com pubsub.googleapis.com
 
 echo "Creating cloud storage bucket..."
 gcloud alpha storage buckets create gs://${GOOGLE_CLOUD_PROJECT}-keyword_factory --project=${GOOGLE_CLOUD_PROJECT}
@@ -35,4 +35,5 @@ gcloud functions deploy classifier-keyword-factory \
 --source=./classifier/ \
 --entry-point=classify \
 --trigger-http \
---timeout=900s
+--timeout=3600s \
+--set-env-vars "bucket_name"="${GOOGLE_CLOUD_PROJECT}-keyword_factory"

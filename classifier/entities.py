@@ -12,7 +12,7 @@ from typing import List, Any, Dict
 from datetime import datetime
 from googleapiclient.errors import HttpError
 
-_CONFIG_FILE_NAME = 'config_v2.yaml'
+_CONFIG_FILE_NAME = 'config.yaml'
 _HEADER = ['Keyword', 'Full Category Path', 'Top Level', 'Bottom Level', 'Confidence']
 _RUN_DATETIME = datetime.now()
 _RUN_METADATA = f'Last run was completed on {_RUN_DATETIME}'
