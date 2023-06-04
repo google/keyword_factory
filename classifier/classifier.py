@@ -17,6 +17,7 @@ from google.api_core.exceptions import ResourceExhausted
 from time import sleep
 import logging 
 
+# Given 600 max words per minute, 60 minutes timeout, 30K should take ~50 minutes with some spare.
 _MAX_KW_CAT = 30000
 
 class Classifier():
@@ -52,7 +53,7 @@ class Classifier():
                         "confidence": None
                     } 
                 for category in response.categories:
-                    results[kw + str(counter)] = {
+                    results[kw] = {
                         "full category": category.name,
                         "confidence": category.confidence
                     }

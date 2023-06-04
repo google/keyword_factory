@@ -27,7 +27,7 @@ import yaml
 BUCKET_NAME = os.getenv('bucket_name')
 CONFIG_FILE_NAME = 'config.yaml'
 CONFIG_FILE_PATH = BUCKET_NAME +  '/' + CONFIG_FILE_NAME
-_ADS_API_VERSION = 'v11'
+_ADS_API_VERSION = 'v13'
 
 SHEETS_SERVICE_SCOPES = ['https://www.googleapis.com/auth/spreadsheets',
           'https://www.googleapis.com/auth/drive.file', 'https://www.googleapis.com/auth/drive']
@@ -62,6 +62,7 @@ class Config:
             with blob.open() as f:
                 config = yaml.load(f, Loader=SafeLoader)
         except Exception as e:
+            print(str(e))
             return None
         return config
 

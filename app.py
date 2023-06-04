@@ -27,23 +27,28 @@ CLASSIFICATION_FAILED_TEXT = "Categorization failed. Press the 'Retry Classifica
 RUN_TYPE_TOOLTIP = """Choose 'Full Run' to pull new keywords and categorize them. Choose 'Filter' to upload a CSV file with keywords to filter and categorize"""
 FILE_UPLOAD_HELP = """Upload a CSV file with keywords you want to filter and categorize. Use a single column with one KW each line"""
 
-
 def run_tool():
+    st.session_state.categorization_finished = False
+    st.session_state.generation_finished = False
     row_num = run(st.session_state.config, st.session_state.accounts_selected,
                   st.session_state.run_type, st.session_state.uploaded_kws)
     results_url = config.spreadsheet_url
-    st.success(
-        f'Keyword generation completed successfully. [Open in Google Sheets]({results_url})', icon="✅")
+
+    st.session_state.generation_finished = True
     return row_num
+
+
+def toggle_show_cat(bol):
+    st.session_state.show_categorization_retry = bol
 
 
 def run_categorization(row_num):
     try:
         classify_keywords(row_num)
-        st.success('Categorization completed succesfully', icon="✅")
+        toggle_show_cat(False)
+        st.session_state.categorization_finished = True
     except:
-        st.warning(CLASSIFICATION_FAILED_TEXT)
-        st.session_state.show_categorization_retry = True
+        toggle_show_cat(True)
 
 
 def validate_config(config):
@@ -74,7 +79,12 @@ def initialize_session_state():
         st.session_state.account_labels = []
     if "show_categorization_retry" not in st.session_state:
         st.session_state.show_categorization_retry = False
-
+    if "generation_finished" not in st.session_state:
+        st.session_state.generation_finished = False
+    if "categorization_finished" not in st.session_state:
+        st.session_state.categorization_finished = False
+    if "row_num" not in st.session_state:
+        st.session_state.row_num = ''
 
 def authenticate(config_params):
     st.session_state.config.client_id = config_params['client_id']
@@ -223,11 +233,19 @@ if st.session_state.run_btn_clicked:
             st.session_state.config, False)
 
     with st.spinner(text='Generating keywords... This may take a few minutes'):
-        row_num = run_tool()
+        st.session_state.row_num = run_tool()
 
-    with st.spinner(text='Running categorization engine... This may take a few minutes'):
-        run_categorization(row_num)
+if st.session_state.generation_finished:
+    st.success(f'Keyword generation completed successfully. [Open in Google Sheets]({config.spreadsheet_url})', icon="✅")
+    
+    if not st.session_state.show_categorization_retry and not st.session_state.categorization_finished:
+        with st.spinner(text='Running categorization engine... This may take a few minutes'):
+            run_categorization(st.session_state.row_num)
 
-if st.session_state.show_categorization_retry:
-    st.button("Retry Categorization", type='primary',
-              on_click=run_categorization(''))
+
+    if st.session_state.show_categorization_retry:
+        st.warning(CLASSIFICATION_FAILED_TEXT)
+        st.button("Retry Categorization",key='retry', type='secondary', on_click=toggle_show_cat, args=[False])
+
+    if st.session_state.categorization_finished:
+        st.success('Categorization completed succesfully', icon="✅")
