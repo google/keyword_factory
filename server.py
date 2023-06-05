@@ -70,10 +70,9 @@ def remove_keywords(client: GoogleAdsClient, recommendations: List[str], accoutn
 
 def classify_keywords(row_num) -> Dict[str, Dict[str, str]]:
     """ Classifys the list of keywords, using GCP NLP classification service.
-    Args: List[str]
+    Args: row_num - number of rows to categorize from the spreadsheet
         List[str] of keywords to categorize
-    Returns: 
-        Dict[str, Dict[str,str]] keyword as key - full categorization and confidence score """
+    """
     req = urllib.request.Request(_CLASSIFIER_URL, method="POST")
     auth_req = google.auth.transport.requests.Request()
     id_token = google.oauth2.id_token.fetch_id_token(auth_req, _CLASSIFIER_URL)

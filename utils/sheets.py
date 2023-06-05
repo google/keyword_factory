@@ -48,6 +48,7 @@ class SheetsInteractor:
 
     def write_to_sheet(self, values, sheet=_OUTPUT_SHEET):
         self._clear_sheet(sheet)
+        values.insert(0, _HEADER)
         range = sheet + '!A1:' + chr(len(values[0]) + 65) + str(len(values))
         body = {
             'values': values

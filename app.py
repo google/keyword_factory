@@ -47,7 +47,8 @@ def run_categorization(row_num):
         classify_keywords(row_num)
         toggle_show_cat(False)
         st.session_state.categorization_finished = True
-    except:
+    except Exception as e:
+        print(str(e))
         toggle_show_cat(True)
 
 

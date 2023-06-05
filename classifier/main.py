@@ -31,9 +31,8 @@ def classify(request):
         results = Classifier().classify_list(list(itertools.chain.from_iterable(kws)))
         sheets_interactor.write_to_sheet(format_data_for_sheet(results))
         
-        return 200
+        return '200'
 
     except Exception as e:
         logging.error(str(e))
-        return 500
-    
+        return '500'
