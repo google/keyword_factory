@@ -27,7 +27,7 @@ import yaml
 BUCKET_NAME = os.getenv('bucket_name')
 CONFIG_FILE_NAME = 'config.yaml'
 CONFIG_FILE_PATH = BUCKET_NAME +  '/' + CONFIG_FILE_NAME
-_ADS_API_VERSION = 'v13'
+_ADS_API_VERSION = 'v14'
 
 SHEETS_SERVICE_SCOPES = ['https://www.googleapis.com/auth/spreadsheets',
           'https://www.googleapis.com/auth/drive.file', 'https://www.googleapis.com/auth/drive']
