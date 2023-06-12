@@ -26,7 +26,7 @@ def classify(request):
         sheet_service = config.get_sheets_service()
         sheets_interactor = SheetsInteractor(sheet_service, config.spreadsheet_url)
         
-        read_range = "B1:B" + str(row_num)
+        read_range = "A2:A" + str(row_num)
         kws = sheets_interactor.read_from_spreadsheet(read_range) 
         results = Classifier().classify_list(list(itertools.chain.from_iterable(kws)))
         sheets_interactor.write_to_sheet(format_data_for_sheet(results))
