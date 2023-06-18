@@ -216,7 +216,8 @@ with st.expander("**Run Settings**", expanded=st.session_state.valid_config and 
         if uploaded_file is not None and not st.session_state.uploaded_kws:
             stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
             for row in csv.reader(stringio):
-                st.session_state.uploaded_kws.append(row[0])
+                if row:
+                    st.session_state.uploaded_kws.append(row[0])
     else:
         st.session_state.uploaded_kws = []
 
