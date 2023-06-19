@@ -1,0 +1,8 @@
+google-ads
+protobuf
+google-api-python-client 
+python-dateutil
+pyyaml
+streamlit
+google-cloud
+google-cloud-storage
