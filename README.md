@@ -48,11 +48,11 @@ This tool is a web app that can be easily deployed on GCP. It helps Google Ads u
 
 Costs are derived from GCP services usage and may vary dependaing on the frequancy of use, the size of tha accounts and the amount of keywords. Usage may also very likely stay in the free tier.
 Costs can result from two services:
-    1. Categorization Service(NLP) - Monthly:
-        1. If you stay below 30K keywords each month, this will be free.
-        1. If you categorize between 30k-220k keywords, you will pay 2$ for each 1k keywords (max 440$)
-    1. Cloud Run services (Hosting and running the app)
-        1. This will most likely remain in the free tier, but you can calculate estimated costs using [this calculator](https://cloud.google.com/products/calculator#id=)
+1. Categorization Service(NLP) - Monthly:
+    1. If you stay below 30K keywords each month, this will be free.
+    1. If you categorize between 30k-220k keywords, you will pay 2$ for each 1k keywords (max 440$)
+1. Cloud Run services (Hosting and running the app)
+    1. This will most likely remain in the free tier, but you can calculate estimated costs using [this calculator](https://cloud.google.com/products/calculator#id=)
 
 ## Disclaimer
 This is not an officially supported Google product.
