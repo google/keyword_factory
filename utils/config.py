@@ -1,4 +1,4 @@
-# Copyright 2022 Google LLC
+# Copyright 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,22 +22,22 @@ from googleapiclient.discovery import build
 from typing import Dict
 import os
 import yaml
+import smart_open as smart_open
+import logging
 
-
-BUCKET_NAME = os.getenv('bucket_name')
-CONFIG_FILE_NAME = 'config.yaml'
-CONFIG_FILE_PATH = BUCKET_NAME +  '/' + CONFIG_FILE_NAME
 _ADS_API_VERSION = 'v14'
 
-SHEETS_SERVICE_SCOPES = ['https://www.googleapis.com/auth/spreadsheets',
-          'https://www.googleapis.com/auth/drive.file', 'https://www.googleapis.com/auth/drive']
+SHEETS_SERVICE_SCOPES = [
+    'https://www.googleapis.com/auth/spreadsheets',
+    'https://www.googleapis.com/auth/drive.file', 
+    'https://www.googleapis.com/auth/drive'
+    ]
 
 class Config:
-    def __init__(self) -> None:
-        self.file_path = CONFIG_FILE_PATH
-        self.storage_client = storage.Client()
-        self.bucket = self.storage_client.bucket(BUCKET_NAME)
-        config = self.load_config_from_file()
+    def __init__(self, ok_if_not_exists = False) -> None:
+
+        self.file_path = os.getenv('config_path') or 'config.yaml'
+        config = self.load_config_from_file(ok_if_not_exists)
         if config is None:
             config = {}
 
@@ -50,32 +50,43 @@ class Config:
 
         self.check_valid_config()
 
+
     def check_valid_config(self):
         if self.client_id and self.client_secret and self.refresh_token and self.developer_token and self.login_customer_id:
             self.valid_config = True
         else:
             self.valid_config = False
 
-    def load_config_from_file(self):
+
+    def load_config_from_file(self, ok_if_not_exists = False) -> dict:
+        config_file_path = self.file_path
         try:
-            blob = self.bucket.blob(CONFIG_FILE_NAME)
-            with blob.open() as f:
-                config = yaml.load(f, Loader=SafeLoader)
-        except Exception as e:
-            print(str(e))
-            return None
+            with smart_open.open(config_file_path, "rb") as f:
+                content = f.read()
+        except BaseException as e:
+            logging.error(f"Config file {config_file_path} was not found: {str(e)}")
+            if ok_if_not_exists:
+              return {}
+            raise FileNotFoundError(config_file_path)
+        try:
+            config = yaml.load(content, Loader=SafeLoader)
+        except BaseException as e:
+            logging.error(f"Failed to parse config file {config_file_path}: {str(e)}")
+            if ok_if_not_exists:
+              return {}
+            raise e
         return config
+
 
     def save_to_file(self):
         try:
-            config = deepcopy(self.to_dict())
-            blob = self.bucket.blob(CONFIG_FILE_NAME)
-            with blob.open('w') as f:
-                yaml.dump(config, f)
-            print(f"Configurations updated in {self.file_path}")
+            with smart_open.open(self.file_path, 'w') as f:
+                yaml.dump(self.to_dict(), f)
+            logging.info(f"Configurations updated in {self.file_path}")
         except Exception as e:
-            print(f"Could not write configurations to {self.file_path} file")
-            print(e)
+            logging.error(f"Could not write configurations to {self.file_path} file: {str(e)}")
+            raise e
+
 
     def to_dict(self) -> Dict[str, str]:
         """ Return the core attributes of the object as dict"""
@@ -88,6 +99,7 @@ class Config:
                 "spreadsheet_url": self.spreadsheet_url
         }
 
+
     def get_ads_client(self):
         return GoogleAdsClient.load_from_dict({
             'client_id': self.client_id,
@@ -98,8 +110,8 @@ class Config:
             'use_proto_plus': True,
         }, version=_ADS_API_VERSION)
 
+
     def get_sheets_service(self):
-        creds = None
         user_info = {
             "client_id": self.client_id,
             "refresh_token": self.refresh_token,
@@ -111,6 +123,5 @@ class Config:
         if creds.expired:
             creds.refresh(Request())
 
-        service = build('sheets',
-                        'v4', credentials=creds)
+        service = build('sheets', 'v4', credentials=creds)
         return service

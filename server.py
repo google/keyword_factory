@@ -20,6 +20,8 @@ from typing import List, Dict
 from google.ads.googleads.client import GoogleAdsClient
 from pathlib import Path
 import urllib
+from google.auth import default
+from google.cloud import functions_v2
 import google.auth.transport.requests
 import google.oauth2.id_token
 import logging
@@ -28,7 +30,7 @@ import os
 import json
 
 _LOGS_PATH = Path('./server.log')
-_CLASSIFIER_URL = os.getenv('cf_uri')
+_CLASSIFIER_FUNCTION_NAME = os.getenv('cf_classifier_name') or "classifier-keyword-factory"
 
 logging.basicConfig(filename=_LOGS_PATH,
                     level=logging.INFO,
@@ -68,14 +70,48 @@ def remove_keywords(client: GoogleAdsClient, recommendations: List[str], accoutn
             logging.exception(e)
 
 
+def get_current_location() -> str:
+    """ Retrieve the current location of Cloud Run service """
+    metadata_url = "http://metadata.google.internal/computeMetadata/v1/instance/region"
+    metadata_headers = {"Metadata-Flavor": "Google"}
+    response = requests.get(metadata_url, headers=metadata_headers)
+    location = response.text.split('/')[-1]
+    return location
+
+
+def get_function_uri(name, location=None, project_id=None) -> str:
+    """ Retrieve a Cloud function's uri by its name in a spacified region
+      Args:
+        name: a function name
+        location: a function location, if None then the current service's location will be used
+        project_id: a function project, if None then the current project will be used
+      Return: uri - a uri for calling the function
+    """
+    functions_client = functions_v2.FunctionServiceClient()
+    if not project_id:
+        _, project_id = default()
+    parent = f"projects/{project_id}"
+    if not location:
+        location = get_current_location()
+    parent += f"/locations/{location}"
+    response = functions_client.list_functions(request={"parent": parent})
+    for function in response:
+        if name == function.name.split("/")[-1]:
+            url = function.service_config.uri
+            return url
+
+
 def classify_keywords(row_num) -> Dict[str, Dict[str, str]]:
     """ Classifys the list of keywords, using GCP NLP classification service.
     Args: row_num - number of rows to categorize from the spreadsheet
         List[str] of keywords to categorize
     """
-    req = urllib.request.Request(_CLASSIFIER_URL, method="POST")
+    cf_uri = os.getenv('cf_uri')
+    if not cf_uri:
+        cf_uri = get_function_uri(_CLASSIFIER_FUNCTION_NAME)
+    req = urllib.request.Request(cf_uri, method="POST")
     auth_req = google.auth.transport.requests.Request()
-    id_token = google.oauth2.id_token.fetch_id_token(auth_req, _CLASSIFIER_URL)
+    id_token = google.oauth2.id_token.fetch_id_token(auth_req, cf_uri)
     req.add_header("Authorization", f"Bearer {id_token}")
     req.add_header('Content-Type', 'application/json')
 

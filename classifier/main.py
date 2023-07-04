@@ -17,12 +17,11 @@ def classify(request):
         If empty - it will read all rows up until last row with data.
     """
     request_json = request.get_json()
-    bucket_name = os.getenv('bucket_name')
+    config_path = os.getenv('config_path') or 'config.yaml'
     row_num = request_json['row_num']
 
     try:
-
-        config = Config(bucket_name)
+        config = Config(config_path)
         sheet_service = config.get_sheets_service()
         sheets_interactor = SheetsInteractor(sheet_service, config.spreadsheet_url)
         

@@ -73,7 +73,8 @@ def initialize_session_state():
     if "valid_config" not in st.session_state:
         st.session_state.valid_config = False
     if "config" not in st.session_state:
-        st.session_state.config = Config()
+        # there's no config on GCS, that's normal
+        st.session_state.config = Config(ok_if_not_exists=True)
     if "accounts_for_ui" not in st.session_state:
         st.session_state.accounts_for_ui = []
     if "account_labels" not in st.session_state:

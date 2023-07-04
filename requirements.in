@@ -6,3 +6,6 @@ pyyaml
 streamlit
 google-cloud
 google-cloud-storage
+google-cloud-functions
+smart_open
+smart_open[gcs]

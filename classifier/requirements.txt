@@ -5,3 +5,5 @@ google-cloud-logging
 google-cloud-language==2.9.0
 google-api-python-client 
 pyaml
+smart_open
+smart_open[gcs]

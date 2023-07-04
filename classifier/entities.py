@@ -2,6 +2,7 @@
 # by the GCF
 
 import yaml
+import logging
 import re
 from yaml.loader import SafeLoader
 from google.cloud import storage
@@ -11,8 +12,8 @@ from googleapiclient.discovery import build
 from typing import List, Any, Dict
 from datetime import datetime
 from googleapiclient.errors import HttpError
+import smart_open as smart_open
 
-_CONFIG_FILE_NAME = 'config.yaml'
 _HEADER = ['Keyword', 'Full Category Path', 'Top Level', 'Bottom Level', 'Confidence']
 _RUN_DATETIME = datetime.now()
 _RUN_METADATA = f'Last run was completed on {_RUN_DATETIME}'
@@ -91,23 +92,27 @@ def format_data_for_sheet(data: Dict[str, Dict[str, Any]]) -> List[List[Any]]:
 
 class Config():
     """Represents and holds a config file"""
-    def __init__(self, bucket_name):
-        config = self._read_config_file(bucket_name)
+    def __init__(self, config_file_path: str):
+        config = self._read_config_file(config_file_path)
         self.client_id = config['client_id']
         self.client_secret = config['client_secret']
         self.refresh_token = config['refresh_token']
         self.spreadsheet_url = config['spreadsheet_url']
 
-    def _read_config_file(self, bucket_name):
-        storage_client = storage.Client()
-        bucket = storage_client.bucket(bucket_name)       
+    def _read_config_file(self, config_file_path: str):
         try:
-            blob = bucket.blob(_CONFIG_FILE_NAME)
-            with blob.open() as f:
-                config = yaml.load(f, Loader=SafeLoader)
-            return config
-        except Exception as e:
-            raise FileNotFoundError
+            with smart_open.open(config_file_path, "rb") as f:
+                content = f.read()
+        except BaseException as e:
+            logging.error(f"Config file {config_file_path} was not found: {str(e)}")
+            raise FileNotFoundError(config_file_path)
+        try:
+            config = yaml.load(content, Loader=SafeLoader)
+        except BaseException as e:
+            logging.error(f"Failed to parse config file {config_file_path}: {str(e)}")
+            raise e
+        return config
+
     
     def get_sheets_service(self):
         creds = None
