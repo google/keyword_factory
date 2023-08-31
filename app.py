@@ -87,6 +87,8 @@ def initialize_session_state():
         st.session_state.categorization_finished = False
     if "row_num" not in st.session_state:
         st.session_state.row_num = ''
+    if "uploaded_kws" not in st.session_state:
+        st.session_state.uploaded_kws = []
 
 def authenticate(config_params):
     st.session_state.config.client_id = config_params['client_id']
@@ -120,11 +122,11 @@ def value_placeholder(value):
 def is_run_not_ready():
     if not st.session_state.valid_config:
         return True
-    if st.session_state.all_accounts == "Selected Accounts" and st.session_state.accounts_selected == []:
+    if st.session_state.all_accounts == "Selected Accounts" and not st.session_state.accounts_selected:
         return True
-    if st.session_state.all_accounts == "By Label" and st.session_state.labels_selected == []:
+    if st.session_state.all_accounts == "By Label" and not st.session_state.labels_selected:
         return True
-    if st.session_state.run_type == "Filter" and st.session_state.uploaded_kws == []:
+    if st.session_state.run_type == "Filter" and not st.session_state.uploaded_kws:
         return True
 
     return False
@@ -214,7 +216,7 @@ with st.expander("**Run Settings**", expanded=st.session_state.valid_config and 
         uploaded_file = st.file_uploader("Choose a CSV file", type=[
                                          'csv'], help=FILE_UPLOAD_HELP)
         # Read file content to a list
-        if uploaded_file is not None and not st.session_state.uploaded_kws:
+        if uploaded_file and not st.session_state.uploaded_kws:
             stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
             for row in csv.reader(stringio):
                 if row:
