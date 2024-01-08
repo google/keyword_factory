@@ -28,9 +28,9 @@ PROJECT_ID=$(gcloud config get-value project 2> /dev/null)
 PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format="csv(projectNumber)" | tail -n 1)
 SERVICE_ACCOUNT=$PROJECT_NUMBER-compute@developer.gserviceaccount.com
 
-GCS_BUCKET=gs://${PROJECT_ID}
-GCS_PATH=$GCS_BUCKET/keyword_factory
-CONFIG_PATH=$GCS_PATH/config.yaml
+GCS_BUCKET=gs://${PROJECT_ID}-keyword_factory
+# GCS_PATH=$GCS_BUCKET/keyword_factory
+CONFIG_PATH=$GCS_BUCKET/config.yaml
 CLASSIFIER_FUNCTION_NAME=classifier-keyword-factory
 
 REGION=$GOOGLE_CLOUD_REGION
@@ -48,8 +48,8 @@ check_billing() {
 }
 
 enable_apis() {
-  echo "${COLOR}Enabling container deployment...${NC}"
-  gcloud auth configure-docker
+  echo -e "${COLOR}Enabling container deployment...${NC}"
+  gcloud auth configure-docker gcr.io  
   echo -e "${COLOR}Enabling APIs...${NC}"
   gcloud services enable storage-component.googleapis.com
   gcloud services enable googleads.googleapis.com \
@@ -74,8 +74,8 @@ create_gcs_bucket() {
 deploy_files() {
   if [[ -f ./config.yaml ]]; then
     echo -e "${COLOR}Uploading files to GCS...${NC}"
-    gsutil cp config.yaml $GCS_PATH
-    echo -e "${COLOR}Files were deployed to ${GCS_PATH}${NC}"
+    gsutil cp config.yaml $GCS_BUCKET
+    echo -e "${COLOR}Files were deployed to ${GCS_BUCKET}${NC}"
   fi
 }
 
