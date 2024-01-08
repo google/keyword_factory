@@ -48,6 +48,8 @@ check_billing() {
 }
 
 enable_apis() {
+  echo "${COLOR}Enabling container deployment...${NC}"
+  gcloud auth configure-docker
   echo -e "${COLOR}Enabling APIs...${NC}"
   gcloud services enable storage-component.googleapis.com
   gcloud services enable googleads.googleapis.com \
