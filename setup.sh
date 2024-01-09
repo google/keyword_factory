@@ -72,11 +72,9 @@ create_gcs_bucket() {
 }
 
 deploy_files() {
-  if [[ -f ./config.yaml ]]; then
-    echo -e "${COLOR}Uploading files to GCS...${NC}"
-    gsutil cp config.yaml.template $CONFIG_PATH
-    echo -e "${COLOR}Files were deployed to ${GCS_BUCKET}${NC}"
-  fi
+  echo -e "${COLOR}Uploading files to GCS...${NC}"
+  gsutil cp config.yaml.template $CONFIG_PATH
+  echo -e "${COLOR}Files were deployed to ${GCS_BUCKET}${NC}"
 }
 
 deploy_cf() {

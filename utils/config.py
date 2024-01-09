@@ -26,7 +26,7 @@ import smart_open as smart_open
 import logging
 
 _ADS_API_VERSION = 'v14'
-_CONFIG_SUFFIX = '-keyword_factory/config.yaml'
+_CONFIG_PATH = 'gs://{project_id}-keyword_factory/config.yaml'
 SHEETS_SERVICE_SCOPES = [
     'https://www.googleapis.com/auth/spreadsheets',
     'https://www.googleapis.com/auth/drive.file', 
@@ -55,7 +55,7 @@ class Config:
         try:
             client = storage.Client()
             project_id = client.project
-            file_path = project_id + _CONFIG_SUFFIX
+            file_path = _CONFIG_PATH.format(project_id=project_id)
         except:
             file_path = 'config.yaml'
         return file_path
