@@ -26,7 +26,7 @@ import smart_open as smart_open
 import logging
 
 _ADS_API_VERSION = 'v14'
-
+_CONFIG_SUFFIX = '-keyword_factory/config.yaml'
 SHEETS_SERVICE_SCOPES = [
     'https://www.googleapis.com/auth/spreadsheets',
     'https://www.googleapis.com/auth/drive.file', 
@@ -36,7 +36,7 @@ SHEETS_SERVICE_SCOPES = [
 class Config:
     def __init__(self, ok_if_not_exists = False) -> None:
 
-        self.file_path = os.getenv('config_path') or 'config.yaml'
+        self.file_path = self._config_file_path_set()
         config = self.load_config_from_file(ok_if_not_exists)
         if config is None:
             config = {}
@@ -50,7 +50,16 @@ class Config:
 
         self.check_valid_config()
 
-
+    def _config_file_path_set(self):
+        file_path = ''
+        try:
+            client = storage.Client()
+            project_id = client.project
+            file_path = project_id + _CONFIG_SUFFIX
+        except:
+            file_path = 'config.yaml'
+        return file_path
+    
     def check_valid_config(self):
         if self.client_id and self.client_secret and self.refresh_token and self.developer_token and self.login_customer_id:
             self.valid_config = True
